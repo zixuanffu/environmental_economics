@@ -1,0 +1,122 @@
+\documentclass[12pt]{article}[margin=1in]
+\usepackage{setspace}
+\linespread{1}
+\usepackage{fullpage,graphicx,psfrag,amsmath,amsfonts,verbatim}
+\usepackage[small,bf]{caption}
+\usepackage{amsthm}
+% \usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
+\usepackage{bbm} % for the indicator function to look good
+\usepackage{color}
+\usepackage{mathtools}
+\usepackage{fancyhdr} % for the header
+\usepackage{booktabs} % for regression table display (toprule, midrule, bottomrule)
+\usepackage{adjustbox} % for regression table display
+\usepackage{threeparttable} % to use table notes
+\usepackage{natbib} % for bibliography
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\input newcommand.tex
+\bibliographystyle{apalike}
+% \setlength{\parindent}{0pt} % remove the automatic indentation
+
+\title{\textbf{Environmental Beliefs and Adaptation to Climate Change}}
+\author{Fu Zixuan}
+\date{\today}
+
+\begin{document}
+\maketitle
+% \thispagestyle{empty}
+% \begin{abstract}
+
+% \end{abstract}
+
+% \newpage
+% \thispagestyle{empty}
+% \tableofcontents
+% \newpage
+
+% \setcounter{page}{1}
+
+
+\paragraph{Summary} The paper studies how beliefs form and evolve in an agricultural setting where farmers hold certain prior beliefs about soil salinity and update them in a Bayesian way after observing agricultural output. In response to these (objective/subjective) changes in salinity (either up or down), they may purchase different types of seeds to protect against soil changes. However, if they overestimate soil salinity and plant high-tolerance seeds on non-saline fields, it negatively affects the harvest. Since accurate beliefs about land properties—and planting seeds accordingly—are crucial for farmers and social welfare, the paper analyzes the problem of adaptation to climate change as follows:
+
+\begin{enumerate}
+    \item \textbf{Theoretical result (Bayesian)}: If priors on soil salinity differ, then even after observing an informative outcome, the posterior beliefs (though updated) still reflect the initial differences.
+    \item \textbf{Quasi-random experiments (DiD)}: Since priors matter significantly, the paper investigates what contributes to different priors and how these priors respond to different signals—one being a salient shock such as a flood, the other a subtler shift in water conditions and sea level.
+    \item \textbf{Randomized experiments (RCT)}: Building on the discussion of belief formation and updating, the author examines the channels through which information influences belief and how belief affects actions. Specifically, it analyzes how information on soil conditions affects the willingness to pay for high-tolerance seeds, actual planting decisions, and ultimately agricultural output. For instance, given that true salinity is low, if information lowers farmers' belief in high salinity, it reduces their willingness to pay for such seeds, leading to fewer high-tolerance seeds planted and an increase in agricultural output.
+    \item \textbf{Counterfactual (Demand model)}: Since beliefs about seed characteristics enter the demand model, changing these beliefs alters demand and thus influences agricultural outcomes.
+\end{enumerate}
+
+I appreciate the diversity of approaches in the paper, beginning with a simple example to illustrate the persistence of belief differences, then leveraging both quasi-random and randomized experiments to present empirical evidence. Additionally, the extensive fieldwork is remarkable, ranging from baseline and endline surveys with farmers to a variety of climate data (soil salinity, water saltiness, sea level, floods, distance, etc.). Finally, the policy recommendation is particularly valuable, not only demonstrating the importance of information but also highlighting that aggregate information can be just as useful as more granular information about land, making it highly relevant for actual policy implementation.
+Now I discuss the first three sections in more details.
+
+\paragraph{Theoretical results} 
+The example begins with a specific harvest environment function that constrains the yield outcome $y$ to be binary. Since the result appears intuitive and straightforward, I intend to avoid specifying a particular functional form and instead adopt a more general setting. 
+
+I define the following two tables of joint probability:
+
+\begin{table}[h]
+    \centering
+    \begin{minipage}{.45\textwidth}
+        \centering
+        \begin{tabular}{c|cc}
+             & $s=1$ & $s=0$  \\
+            \midrule
+            $b=1$ & $\pi_{11}$ & $\pi_{10}$ \\
+            $b=0$ & $\pi_{01}$ & $\pi_{00}$ \\
+        \end{tabular}
+        \caption{Joint probability $\Pr(y=1,s,b)$}
+        \label{tab:first}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{.45\textwidth}
+        \centering
+        \begin{tabular}{c|cc}
+             & $s=1$ & $s=0$  \\
+            \midrule
+            $b=1$ & $p_{11}$ & $p_{10}$ \\
+            $b=0$ & $p_{01}$ & $p_{00}$ \\
+        \end{tabular}
+        \caption{Joint probability $\Pr(y=0,s,b)$}
+        \label{tab:second}
+    \end{minipage}
+\end{table}
+
+Having observed $y=1$, the posterior belief on $s=1$ and $b=1$ is updated, where the denominators remain the same. The numerators are simply $\pi_{11}+\pi_{01}$ and $\pi_{11}+\pi_{10}$. Similarly, for updating after $y=0$, maintaining $\Pr(s=1) > \Pr(b=1)$ (i.e., keeping the default hypothesis unchanged) requires $\pi_{01} > \pi_{10}$ \textbf{and} $p_{01} > p_{10}$, yet the prior only guarantees that $\pi_{01} + p_{01} > p_{10} + \pi_{10}$. Therefore, I could not generalize the result without assuming a specific functional form. While the arguments in the appendix are simple and clear, I am uncertain whether they constitute a well-established theoretical result. 
+
+\paragraph{Quasi-random experiments}
+This section of the paper begins with behavioral and psychological arguments about limited attention to different signals (salient shocks or subtle shifts). From signal perception to attention allocation to cognitive processing, the authors provide three explanations:
+\begin{enumerate}
+    \item The signal carries different amounts of information.
+    \item The signal is not noticed.
+    \item While processing the signal relative to the original hypothesis, only a limited number of explanations come to mind.
+\end{enumerate}
+
+To compare the effects of the two different signals (salient shock and subtle shift), the authors examine their impact on true salinity and subjective measures.\footnote{The way the authors collect this subjective measure is interesting.} 
+
+The first quasi-experiment identifies the effect of saline floods using a difference-in-differences (DiD) specification:
+\begin{equation}
+    Y_i = \alpha + \beta_1 (\text{Floods} \times \text{Water Saltiness}) + \beta_2 \text{Floods} + \beta_3 \text{Water Saltiness} + \epsilon_i
+\end{equation}
+This two-way fixed effects (TWFE) regression specification treats water saltiness as a time variable and floods as the treatment. However, I am uncertain whether this corresponds to a staggered binary treatment design with two periods and two groups. If so, TWFE identification would be equivalent to the DiD estimator, which identifies the average treatment effect (ATE). Otherwise, any source of heterogeneity (across groups or treatment levels) would disrupt this equivalence.
+
+For the subtle shift, the authors adopt a triple-differences (DDD) framework to estimate the effect of gradual sea level rise:
+\begin{equation}
+    Y_i = \alpha + \beta_1 (\text{Closer} \times \text{Saltier} \times \text{Higher}) + \ldots + \epsilon_i
+\end{equation}
+Being unfamiliar with the DDD design, I find it difficult to map each variable to those in a standard DDD framework.
+
+Surprisingly, the two $\beta_1$ coefficients have similar values when the dependent variable is true soil salinity.
+
+
+\paragraph{Randomized experiments} 
+This randomized experiment, which randomly assigns information to farmers in the endline survey and randomly assigns high-tolerance seeds in the baseline survey, is quite interesting to analyze.
+
+Regarding how information translates into the adoption of climate technology (buying high-tolerance seeds), the paper employs a two-stage least squares (2SLS) estimation. The first stage examines the effect of the information treatment on belief, while the second stage measures how the planting of high-tolerance seeds changes when belief is updated. The paper then investigates how planting high-tolerance seeds affects crop yields through another randomization. Here, they instrument seed plantation using the treatment assignment.\footnote{Does this correspond to a LATE estimator?}
+
+What confuses me is the dual elicitation of willingness to pay (WTP)—one for information and another for seeds. I believe the explanation could be clearer, particularly in terms of the connection between these elicitations and the randomization process.
+
+\pagebreak \newpage \bibliography{../References/ref.bib}
+
+\end{document}

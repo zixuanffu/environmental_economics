@@ -4,5 +4,6 @@
 - [Report](Report1/report_referee.pdf)
 ## Discussion Paper 2
 - [Report](Report2/report_referee.pdf)
-## Coding Exercise
 ## Method Note
+- [Note](MethodNote/note_method.pdf)
+## Coding Exercise

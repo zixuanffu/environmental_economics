@@ -1,4 +1,4 @@
 .DS_Store
-CodingExercise/Data/
-CodingExercise/References/
-CodingExercise/Instructions/
+CodingExercise/Data/*
+CodingExercise/References/*
+CodingExercise/Instructions/*

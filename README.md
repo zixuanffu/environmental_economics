@@ -7,3 +7,4 @@
 ## Method Note
 - [Note](MethodNote/note_method.pdf)
 ## Coding Exercise
+- [Notebook](CodingExercise/Code/notebook.ipynb)

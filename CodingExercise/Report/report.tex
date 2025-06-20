@@ -12,7 +12,7 @@
 \usepackage{adjustbox} % for regression table display
 \usepackage{threeparttable} % to use table notes
 \usepackage{natbib} % for bibliography
-\input newcommand.tex
+\input{newcommand.tex}
 \bibliographystyle{apalike}
 \setlength{\parindent}{0pt} % remove the automatic indentation % for problem set
 \renewcommand{\thesection}{Question \arabic{section}}
@@ -36,14 +36,148 @@ Environmental Economics}
 \maketitle
 
 \section{Spatial Data}
-\subsection{Irrigation in Almeria}
-The \texttt{land\_use\_panel.csv} provides information on the use of land (crop type and irrigation) for each piece of land in Almeria. 
+\subsection{Land size}
+\input{../Tables/grid_head.tex}
 
-\begin{figure}[h]
+\subsection{Cropland in Almeria}
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{../Figures/land_use_distribution_almeria_2021.pdf}
 \end{figure}
 
+\subsection{Cropland size under irrigation over time}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../Figures/irrigated_area_by_crop_over_time.pdf}
+\end{figure}
+
+\section{Model}
+\paragraph{State} Usually, we write the observed state as $s$ and unobserved state as $\varepsilon$.
+
+Here, the observed state has to two components: the individual state $k$ and the aggregate state $\omega$. 
+\begin{enumerate}
+    \item $k$ evolves deterministically, i.e. $k_{t+1} = a_t$
+    \item $\omega$ evolves in the following way, $G(\omega_{t+1} | \omega_t, a_t) = G(\omega_{t+1} | \omega_t)$
+\end{enumerate}
+
+\paragraph{Reward function and Value function}
+
+I denote the reward function as $u(k, \omega)$, and the continuation reward function as $\tilde{u}(k, \omega,a) = u(k, \omega, a) + \beta \E\bra{\tilde{V}_{t+1}(k_{t+1}, \omega_{t+1}) | k, \omega, a}$.
+
+Also  value function is written as $V_t(k,\omega, \varepsilon)$ and the expected value function $\bar{V}_t(k,\omega)$. 
+
+\paragraph{Derivation} There is a nice relationship between the expected value function and the continuation reward function, which is
+$$ \bar{V}_t(k, \omega) = \tilde{u}(k, \omega, a) + \psi_a(p(k,\omega))$$  for any choice of action $a$.
+In the form that we are more familiar with by imposing the standard assumption on $\varepsilon$,
+$$ \bar{V}_t(k, \omega) = \tilde{u}(k, \omega, a) + \gamma -\Pr(a_t = a | k, \omega) $$
+
+Now let us take another chioce $a_t=j$ which gives exactly the same stuff
+$$ \bar{V}_t(k, \omega) = \tilde{u}(k, \omega, a) + \psi_a(p(k,\omega)) $$
+Then we can take the difference between the two equations above,
+$$ \psi_j(p(k,\omega)) - \psi_a(p(k,\omega)) = \tilde{u}(k, \omega, a) - \tilde{u}(k, \omega, j) $$
+Imposing the standard assumption on $\varepsilon$ such that $\psi_a(p(k,\omega)) = \gamma - \log \Pr(a_t = a | k, \omega)$.
+The left hand side becomes $$ \log \frac{\Pr(a_t = j | k, \omega)}{\Pr(a_t = a | k, \omega)} $$
+Look at the right hand side, how to express the $\tilde{u}(k, \omega, a)$ as an explicit function of observed variables and parameters? 
+First, recall that individual state $k$ evolves deterministically,
+$$ \tilde{u}(k, \omega, a)  = u(k, \omega, a) + \beta \E\bra{\bar{V}_{t+1}(a, \omega_{t+1}) | k, \omega, a} $$
+Then how to make use of renewal action? For example, we choose $a_t = a$ and $a_{t+1} = r$ OR $a_t = j$ and $a_{t+1} = r$. Since we the individual state is equal to the last period action, even if we are not switching crop, as long as we choose the same action, the individual state is the same (one period finite dependence?)
+$$ \E_{\omega_{t+1}|j,\omega} \bar{V}_{t+1}(r, \omega_{t+1}| j, \omega, r) = \E_{\omega_{t+1}|a,\omega}\bar{V}_{t+1}(r, \omega_{t+1}| a,\omega, r)$$
+
+Recall in the case of \citet{scott2014dynamic}, the renewal action is choosing crop, the state $k$ is the number of years up to now that the land is not used for growing crops. 
+$$ \E_{\omega_{t+1}} \bar{V}_{t+1}(k_{t+1}=2, \omega_{t+1}|k=1,\omega, a=\text{other}) \neq \E_{\omega_{t+1}} \bar{V}_{t+1}(k_{t+1}=3, \omega_{t+1}| k=2,\omega, a=\text{other})$$
+But 
+$$ \E_{\omega_{t+1}} \bar{V}_{t+1}(k_{t+1}=0, \omega_{t+1}|k=1,\omega, a=\text{crop}) = \E_{\omega_{t+1}} \bar{V}_{t+1}(k_{t+1}=0, \omega_{t+1}| k=2,\omega, a=\text{crop})$$
+
+Back to the problem set, we have that by 
+$$ \tilde{u}_t(k, \omega, a) = u_t(k, \omega, a) + \beta \E_{\omega_{t+1}} \bar{V}_{t+1}(a, \omega_{t+1}| k, \omega, a) $$
+Similarly for $\tilde{u}_t(k, \omega, j)$, but of course 
+$$ \E_{\omega_{t+1}|\omega} \bar{V}_{t+1}(a, \omega_{t+1}| k, \omega, a) \neq \E_{\omega_{t+1}|\omega} \bar{V}_{t+1}(j, \omega_{t+1}| k, \omega, j) $$ But if we look one period ahead, choosing the same action at $t+1$, then 
+$$ \E_{\omega_{t+2}|\omega'}\bar{V}_{t+2}(r, \omega_{t+2}| a, \omega', r) = \bar{V}_{t+2|\omega'}(r, \omega_{t+2}| j, \omega', r) $$
+Then the right hand side becomes
+\begin{equation}
+    \begin{split}
+        \tilde{u}_t(k, \omega, a) - \tilde{u}_t(k, \omega, j) & = u_t(k, \omega, a) - u_t(k, \omega, j)                                                                                                                                                 \\
+                                                              & + \beta\E_{\omega_{t+1}|\omega} \bra{u_{t+1}(a, \omega_{t+1},r) -\ln \Pr_{t+1}(r | a, \omega_{t+1}) + \E_{\omega_{t+2}|\omega_{t+1}}\bar{V}_{t+2}(r, \omega_{t+2}| a, \omega_{t+1}, r)} \\
+                                                              & - \beta\E_{\omega_{t+1}|\omega} \bra{u_{t+1}(j, \omega_{t+1},r) -\ln \Pr_{t+1}(r| j, \omega_{t+1}) + \E_{\omega_{t+2}|\omega_{t+1}}\bar{V}_{t+2}(r, \omega_{t+2}| j, \omega_{t+1}, r)}  \\
+                                                              & = u_t(k, \omega, a) - u_t(k, \omega, j) + \beta \E_{\omega_{t+1}|\omega} \bra{u_{t+1}(a, \omega_{t+1},r) - u_{t+1}(j, \omega_{t+1},r)}                                                  \\
+                                                              & + \beta \E_{\omega_{t+1}|\omega} \bra{\ln \Pr_{t+1}(r | a, \omega_{t+1}) - \ln \Pr_{t+1}(r | j, \omega_{t+1})}
+    \end{split}
+\end{equation}
+
+Since we don't know the evolution fo aggregate state $\omega$ (we didn't even define it), by fixing one $\omega_{t+1}=\omega'$ and
+\begin{equation}
+    \begin{split}
+        \tilde{u}_t(k, \omega, a) - \tilde{u}_t(k, \omega, j) & = u_t(k, \omega, a) - u_t(k, \omega, j)                                                                                                        \\
+                                                              & + \beta\bra{u_{t+1}(a, \omega',r) -\ln \Pr_{t+1}(r | a, \omega') + \E_{\omega_{t+2}|\omega'}\bar{V}_{t+2}(r, \omega_{t+2}| a, \omega', r)  }   \\
+                                                              & -\beta \bra{u_{t+1}(j, \omega',r) -\ln \Pr_{t+1}(r| j, \omega') + \E_{\omega_{t+2}|\omega_{t+1}}\bar{V}_{t+2}(r, \omega_{t+2}| j, \omega', r)} \\
+                                                              & + e_t(\omega',\omega, a) -e_t(\omega',\omega, j) 
+    \end{split}
+\end{equation}
+where $e_t(\omega',\omega, a) = \beta \E_{\omega_{t+1}|\omega} \bar{V}_{t+1}(a, \omega_{t+1}| k, \omega, a)  - \beta \bar{V}_{t+1}(a, \omega'| k, \omega, a)$ which is the difference between the expecatation over $\omega_{t+1}|\omega$ and a random fixed $\omega_{t+1}=\omega'$.
+
+Therefore the regression equation is 
+\begin{equation}
+    \begin{split}
+        \log \frac{\Pr(a_t = j | k, \omega)}{\Pr(a_t = a | k, \omega)} + \beta \log \frac{\Pr_{t+1}(r | a, \omega')}{\Pr_{t+1}(r | j, \omega')} & = u_t(k, \omega, a) - u_t(k, \omega, j) \\ &+ \beta\bra{u_{t+1}(a, \omega',r) - u_{t+1}(j, \omega',r)} + e_t(\omega',\omega, a) - e_t(\omega',\omega, j)
+    \end{split}
+\end{equation}
+
+Plug in the functional form of the reward function,
+$$ u_t(k, \omega=(m,\eta), a) = \theta_a+\theta_{ka}+\theta_R R(m,a) + \xi(k, \omega, a)$$
+Then the regression equation is 
+\begin{itemize}
+    \item $ Y_{tk}  = \log \frac{\Pr(a_t = j | k, \omega)}{\Pr(a_t = a | k, \omega)} + \beta \log \frac{\Pr_{t+1}(r | a, \omega')}{\Pr_{t+1}(r | j, \omega')}$
+    \item $\theta_j-\theta_a + \theta_{kj} - \theta_{ka} + \beta(\theta_{jr}-\theta_{ar})$
+    \item $\theta_R(R(m,a) - R(m,j))$
+    \item $\xi(k, \omega,j) - \xi(k, \omega,a) + \beta(\xi_{t+1}(j, \omega',r) - \xi_{t+1}(a, \omega',r))$
+    \item $e_t(\omega',\omega, a) - e_t(\omega',\omega, j)$
+\end{itemize}
+
+
+This is like the when we use market share data to estimate the parameters. In a market,
+$$ \log(s_j/s_0)=\alpha+ \beta X_j + \xi_j$$
+With multiple years of observations of the market.
+$$ \log(s_{jt}/s_{0t}) = \alpha + \beta X_{jt} + \xi_{jt}$$
+if for a given $j$, $\xi_{jt}$ is correlated across time, we should control for it $\xi_{jt} = \xi_j + \varepsilon_{jt}$. 
+Then use the fixed effect estimator etc. 
+Similarly here, the unit of observation is $k-j-a-r$. and fixed effect corresponds to. 
+
+\paragraph{Source of variation} The identifying variation is cross sectional variation in $R(m,j) - R(m,a)$ for different $j-a$ pairs and across time variation $R_t(m,j) - R_t(m,a)$ over different $t$ (becasue we need to take difference later!).
+
+\paragraph{Endogeneity} First, ignoring the fixed effect term, he terms xxx in the euqation are treated as the error term in the regression but one needs to justify that
+they are uncorrelated with $\Delta R(m,j,a)$ (across section endogeneity). For example, it may be the case the individual land $\xi(k, \omega, a)$ is uncorrelated with some variables $m$, and $R(m,j)$ is correlated with that $m$. Then we can use $m$ as the instrument. 
+
+Secondly, to remove fixed effect, we need to take first difference, which introduces more endogeneity concerns (over time endogeneity). For example, the error term $\xi(k, \omega, a)$ is correlated with $R(m,j)$ over time. The first difference GMM estimator can be used to deal with the issue. Use lagged values of regressors $x_{t-2}$ as instruments for the first difference of the regressors $\Delta x_{t}=x_{t}-x_{t-1}$.
+
+
+\paragraph{Restriction and normalization}
+\begin{enumerate}
+    \item How many fixed effect can we estimate? $|k|^4$ fixed effects.
+    \item How many parameters do we have? $|k|+|k|^2$.
+\end{enumerate}
+If we just fix one $j-a-r$, there are $|k|$ fixed effect, and $2|k|+1$ parameters ($\theta_{kj}$,$\theta_{ka}$,the rest) to estimate. Some restrictions are needed. 
+
+
+\begin{enumerate}
+    \item we set $\theta_{ka}$ to be the same for all $k$. reduce by $|k|-1$.
+    \item we assume non-switching cost is zero such that $\theta_{jj}=0$. reduce by 1.
+    \item one more restriction is needed. therefore we set $\theta_{ka}=0$ as well. reduce by 1.
+\end{enumerate}
+
+But this is actually not necessary. Perhaps we have over identifification. But I will just leave it there as it is.
+
+
+
+
+
+% Keeping the standard assumption on $\varepsilon$, the ccp takes the form of 
+% $$ \Pr(a_t = a | k, \omega) = \frac{\exp \tilde{u}(k, \omega, a)}{\sum_{a' \in A} \exp \tilde{u}(k, \omega, a')} $$
+
+
+\section{Estimation}
+
+\newpage
+\bibliography{ref.bib}
 
 \end{document}
 

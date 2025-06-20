@@ -15,8 +15,8 @@
 \input newcommand.tex
 \bibliographystyle{apalike}
 \setlength{\parindent}{0pt} % remove the automatic indentation % for problem set
-% \renewcommand{\thesection}{Question \arabic{section}}
-% \renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesection}{Question \arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
 
 % Settings for page number in the footer
 \pagestyle{fancy}
@@ -35,180 +35,14 @@ Environmental Economics}
 \begin{document}
 \maketitle
 
-\setcounter{page}{1}
-\section{Preliminaries}
-The dynamic discrete choices framework is ubiquitous. However, there seems not to be a standard way to name the different forms of value functions essential to this framework. Therefore, in this section, I will set the stage by defining the set of value functions before proceeding to deriving the so-called euler linear equaiton. 
+\section{Spatial Data}
+\subsection{Irrigation in Almeria}
+The \texttt{land\_use\_panel.csv} provides information on the use of land (crop type and irrigation) for each piece of land in Almeria. 
 
-\paragraph{Reward function}
-The variables in the reward functions include state $s$, action $a$, and possibly shock $\epsilon$. 
-\text{Total} refers to the inclusion of shock $\epsilon$ while \text{Continuation} refers to the inclusion of future value.
-\begin{enumerate}
-    \item reward function $u(s, a)$: where $s$ is the state and $a$ is the action.
-    \item total reward function $v(s, a, \epsilon)$: where $\epsilon$ is the shock.
-    \item continuation reward function $\tilde{u}(s, a) = u(s, a) +  \beta E_{(s_{t+1},\epsilon_{t+1})\mid (a, s, \epsilon)} V(s_{t+1},\epsilon_{t+1})$.
-    \item total continuation value function $\tilde{v}(s, a , \epsilon)  = \tilde{u}(s, a) + \epsilon_a$
-\end{enumerate}
-
-\paragraph{Value function}
-The variables in the value functions inclue state $s$, possibly shock $\epsilon$. 
-\begin{enumerate}
-    \item value function $V(s, \epsilon) = \max_{a} \tilde{v}(s, a , \epsilon)$
-    \item expected (total) value function $$\bar{V}(s) = \int_{\epsilon} V(s, \epsilon) dF(\epsilon)$$
-\end{enumerate}
-
-
-\paragraph{Independence assumption between the shock $\epsilon_a$ across choice } Sometimes I forget that there is a random shock for \textbf{each} choice $a$. They are assumed to be independent across choices, and usually follow a type I extreme value distribution.
-\paragraph{Conditional indenpendce assumption between shock $\epsilon_a$ across time} This is an assumption specific to dynamic setting (the first one is assumed in static as well). 
-That the future shock is independent of current shock, state and choice.
-$$f((s_{t+1}, \epsilon_{t+1})\mid (a, s, \epsilon)) = f(\epsilon_{t+1})f(s_{t+1}\mid (a, s))$$
-
-\paragraph{Relationship}
-The relationship between the value function and expected value function therefore can be written as
-$$ \bar{V}(s) = \int_{\epsilon} \left [\underbrace{\underbrace{
-                \max_{a}u(s, a) + \beta  E_{s_{t+1}\mid (a, s)} \bar{V}(s_{t+1})}_{\tilde{u}(s,a)} + \epsilon_a}_{\tilde{v}(s,a,\epsilon)}\right] dF(\epsilon)$$
-
-which is used to sovle for the expected value function by solving for the fixed point of the above operator.
-
-\section{Linear Regression Equation}
-
-Here the setting is about the supply side of crop. More specifically the the chocie of land use (non-crop, crop etc.)
-
-Recall that in the demand side setting, we have also used discrete choice framework. 
-\begin{enumerate}
-    \item Individual data: derive a conditional choice probability for individual. Then estimate by MLE. $$\sum \log P(a_i \mid s_i, \theta)$$
-    \item Market share data: in the simplest case, everyone $i$ is the same, thus the ccp of each individual $i$ is the market share. then estimate the \textbf{linear equation}.
-\end{enumerate}
-
-Here the paper is doing something similar. In the simplest case, every land $i$ is the same.The ccp of each unit $i$ is estimated from the \textit{market share}, which is just the frequency of choosing $j$ (conditioned on the some state variables). 
-\subsection{Static case} Recall in the static case, the linear equation is straightforward, 
-$$\Pr(a_i = j) = \frac{e^{\alpha_j + \beta x_j + \xi_j}}{1+\sum_{j'} e^{\alpha_{j'} + \beta x_{j'}+\xi_{j'}}}$$
-$$\Pr(a_i = 0) = \frac{1}{1+\sum_{j'} e^{\alpha_{j'} + \beta x_{j'}+\xi_{j'}}}$$
-
-Then we can take the log of both sides and take differences,
-which gives us the linear regression equation
-$$ \log(p_j) -\log(p_0) = \alpha_j + \beta x_j + \xi_j$$
-
-\begin{remark}
-    The outside option here in the static case serves a similar purpose as the renewal action in the dynamic case. 
-\end{remark}
-
-Treating every $i$ as the same, we can estimate $p_j=\Pr (a_i = j)$ by the fequency of choosing $j$ in the data, which is the \textit{market share} $s_j$ in the demand setting.  
-
-\subsection{Dynamic case} In the dynamic case, do we have a similar linear regression equation? The answer is yes, which is the main contribution of the paper. The following derives it step by step.
-
-
-In the static case, we have the reward function $u(s,j)$. Then the ccp is just 
-$$\Pr(a = j ) = \frac{e^{u(s, j)}}{1+\sum_{a'} e^{u(s, a')}}$$
-
-In the dynamic case, do we have something similar? Yes, but much more complicated.
-
-The ccp in the dynamic case is
-$$\Pr_t(j \mid s) = \frac{e^{\tilde{u}_t(s, j)}}{1+\sum_{a'} e^{\tilde{u}_t(s, a')}}$$
-
-where $\tilde{u}_t(s, a) = u_t(s, a) + \beta E_{(s_{t+1},\epsilon_{t+1})\mid (a, s, \epsilon)} V_{t+1}(s_{t+1},\epsilon_{t+1})$.
-
-Take two actions $j$ and $a$ as well and divide and take the log, similar to what we do in the static case.
-$$\log \frac{\Pr_t(j \mid s)}{\Pr_t(a \mid s)} = \tilde{u}_t(s, j) - \tilde{u}_t(s, a)$$
-Yet this $\tilde{u}_t(s, a)$ is not linear in the parameters we want to estimate straightforwardly due to expectation terms. That is 
-$$ \log \frac{\Pr_t(j \mid s)}{\Pr_t(a \mid s)} = u_t(s, j) -u_t(s, a) + \beta E_{(s_{t+1},\epsilon_{t+1})\mid (j, s, \epsilon)} V_{t+1}(s_{t+1},\epsilon_{t+1}) - \beta E_{(s_{t+1},\epsilon_{t+1})\mid (a, s, \epsilon)} V_{t+1}(s_{t+1},\epsilon_{t+1})$$
-
-The only thing left to do now is to find a way to rewrite the expectation term such that they are linear in parameters.
-
-\begin{enumerate}
-    \item Thanks to conditional independence assumption,
-          $$E_{(s_{t+1},\epsilon_{t+1})\mid (j, s,\epsilon)} V_{t+1}(s_{t+1},\epsilon_{t+1})  = E_{(s_{t+1})\mid (j, s)} \bar{V}(s_{t+1})$$
-    \item Let us pick a state $s_{t+1}= s'$ and rewrite the expectation term as
-          $$ E_{(s_{t+1})\mid (j, s_t)} \bar{V}_{t+1}(s_{t+1}) = \bar{V}_{t+1}(s_{t+1}=s') + \varepsilon_t(s', j, s)$$
-          where we define 
-          $$ \varepsilon_t(s', j, s) = E_{(s_{t+1})\mid (j, s)} \bar{V}_{t+1}(s_{t+1}) - \bar{V}_{t+1}(s')$$
-          Note that $s_{t+1}$ is a random variable and $s'$ is a fixed state.
-    \item Then the foucs is now on $\bar{V}_{t+1}(s_{t+1}=s')$ How do we write $\bar{V}_{t+1}(s_{t+1}=s')$ linear in parameters?
-    \item Notice the nice relationship that
-          $$ \bar{V}_{t+1}(s_{t+1}=s') = \tilde{u}_{t+1}(s_{t+1}=s', r) - \ln \Pr_{t+1}(r \mid s_{t+1}=s')+\gamma$$
-          $$ = u_{t+1}(s', r) + \beta E_{s_{t+2}\mid (r, s_{t+1}=s')} \bar{V}_{t+2}(s_{t+2}) - \ln \Pr_{t+1}(r \mid  s_{t+1}=s') + \gamma$$
-    \item This $r$ is not just any action, it is a renewal action that resets things. What does it mean? Let us look what happens at $t+2$ after we take the renewal action at $t+1$.
-          $$ E_{s_{t+2}\mid (a^*, s_{t+1}=s')} \bar{V}_{t+2}(s_{t+2}) $$
-          $$\int_{s_{t+2}}  \bar{V}_{t+2}(s_{t+2}) d F_{s_{t+2}\mid (r, s_{t+1}=s')}(s_{t+2}) $$
-          Therefore, for a different value of $s_{t+1}=s''$, we have different $F(s_{t+2}\mid (r, s_{t+1}=s''))$.
-          What renewal action does is to make this the same, that is when choosing the renewal action $r$ at $t+1$, we have
-          $$ F(s_{t+2}\mid (r, s_{t+1}=s')) = F(s_{t+2}\mid (r, s_{t+1}=s'')) \forall s_{t+1}=s''$$
-    \item Therefore, The difference between two $\bar{V}(s_{t+1}=s')$ and $\bar{V}(s_{t+1}=s'')$ is \textit{clean}.
-          $$ \bar{V}(s_{t+1}=s') - \bar{V}(s_{t+1}=s'') = u_{t+1}(s', r) - u_{t+1}(s'', r) - \ln \Pr_{t+1}(r \mid s_{t+1}=s') + \ln \Pr_{t+1}(r \mid s_{t+1}=s'') + $$
-          
-          
-\end{enumerate}
-
-Maybe it's time to write everything down altogether.
-\begin{equation}
-    \begin{split}
-        \log \frac{\Pr_t(j \mid s_t=s)}{\Pr_t(a \mid s_t=s)} & = u_t(s, j) -u_t(s, a) + \beta(\bar{V}_{t+1}(s_{t+1}=s') - \bar{V}_{t+1}(s_{t+1}=s'') )+ \varepsilon_t(s', j, s) - \varepsilon_t(s'', a, s) \\
-                                                             & = u_t(s, j) -u_t(s, a)+ \beta  [ u_{t+1}(s', r) - u_{t+1}(s'', r)                                                                           \\&- \ln \Pr_{t+1}(r \mid s_{t+1}=s') + \ln \Pr_{t+1}(r \mid s_{t+1}=s'')]
-        + \varepsilon_t(s', j, s) - \varepsilon_t(s'', a, s)                                                                                                                                               \\
-    \end{split}
-\end{equation}
-Rearranging the terms, we have
-\begin{equation}
-    \begin{split}
-        \log \frac{\Pr_t(j \mid s_t=s)}{\Pr_t(a \mid s_t=s)} + \beta(\frac{\Pr_{t+1}(r \mid s_{t+1}=s')}{\Pr_{t+1}(r \mid s_{t+1}=s'')}) & =u_t(s, j) -u_t(s, a)                                                                                                            \\ 
-                                                                                                                                         & + \beta \left [ u_{t+1}(s', r) - u_{t+1}(s'', r)                   \right ] + \varepsilon_t(s', j, s) - \varepsilon_t(s'', a, s) \\
-    \end{split}
-\end{equation}
-
-Hmmm, this linear equation looks cool but the $\varepsilon_t$ looks really suspicious to me here. Also, it seems to be calling for lots of assumptions on the form of $u(s, a)$. 
-
-Let us delve into them.
-
-\paragraph{Reward function $u(s, a)$}
-As a function of state $s$ and action $a$,
-$$ u(s, a) = \alpha(s,a) + \alpha_R R(s,a) + \xi(s,a)$$
-In the paper,
-
-$$  u(k, a) = \alpha(k,a) + \alpha_R R(a) + \xi(k,a)$$
-
-Also the paper assumes that individual state (let us ignore aggregate state for the moment) evolves deterministically, the individual state is the same as last period's action.
-
-$$ u(k, a) = \theta_k + \theta_{ka} + \alpha_R R(a) + \xi(k,a)$$
-
-Therefore the linear regression equation can be written as
-\begin{equation} \label{eq:linear_regression}
-    \begin{split}
-        \log \frac{\Pr_t(j \mid k)}{\Pr_t(a \mid k)} + \beta\log(\frac{\Pr_{t+1}(r \mid j)}{\Pr_{t+1}(r \mid a)})
-         & =  \alpha_{k,j}-\alpha_{k,a}+\beta(\alpha_{j,r}-\alpha_{a,r}) + \alpha_R (R_t(j) - R_t(a)) \\ & + \xi_t(k,j)-\xi_t(k,a) + \beta(\xi_{t+1}(j, r) - \xi_{t+1}(a, r)) + \varepsilon_t(j,k) - \varepsilon_t(a,k)\\
-    \end{split}
-\end{equation}
-
-
-\paragraph{Clarification on notation}
-\begin{enumerate}
-    \item When a variable is indexed by time $t$, it is a random variable, for example $s_{t+1}$.
-    \item When a variable is not indexed by $t$, it is a fixed value, for example $s'$. The parameter is also a fixed value, for example $\alpha_{k,j}$. \item When a function is indexed by time $t$, it means the function input needs to be a variable at time $t$, for example you need to put variables from time $t$ into function $u_t$. For the choice probability $\Pr_t$, it is also a function, same idea.
-    \item When a function is not indexed by $t$, it just means the function form.
-\end{enumerate}
-
-\paragraph{Restriction and normalization}
-
-The parameters we care about are $\alpha_{k,j}$ for all $(k,j)$ pairs and $\alpha_R$. However, for one specific $k$, we can only have one intercept recovered. When indeed we have $\alpha_{k,j}$ and $\alpha_{k,a}$ that we care about. Therefore, we need to make some assumptions. The assumption that this paper makes is that for one choice $k^*$ all the $\alpha_{kk^*}$ is the same for all current state $k$. And we normalize it to $\alpha_{kk^*} = 0$.
-
-The problem set takes a similar approach, for a fixed $k$ and some fixed $jar$, we know the value of
-$$ \theta_{j} + \theta_{a} + \theta_{kj} + \theta_{ka} + \beta(\theta_{jr} - \theta_{ar})$$
-Then just pick another $k'= a$ and the same fixed $jar$, we know 
-$$ \theta_{j} + \theta_{a} + \theta_{aj} + \theta_{aa} + \beta(\theta_{jr} - \theta_{ar})$$
-Then we can take the difference between the two equations, which gives us
-$$ \theta_{kj} + \theta_{ka} - \theta_{aj} - \theta_{aa} $$
-Restrict that for one choice $j^*$, we have $\theta_{kj^*} = 0$ for all $k$. Then the above becomes $$ \theta_{ka} - \theta_{aa}$$
-We also assume that $\theta_{aa} = 0$ for all $a$. Then we recovre $ \theta_{ka}$
-
-Therefore to recover $\theta_{ka}$, 
-\begin{enumerate}
-    \item We need $\Delta_{kj^*ar}$ and $\Delta_{aj^*ar}$
-    \item Then $\theta_{ka} = \Delta_{kj^*ar} - \Delta_{aj^*ar}$ if we assume $\theta_{kj^*} = 0$ for all $k$ and $\theta_{aa} = 0$ for all $a$.
-\end{enumerate}
-
-\subsection{Estimation}
-We construct a panel data. The unit is indexed by $k$ and $j$ and $a$ and $r$ (and $m$). The time is indexed by $t$. Then we adopt techniques in panel data estimation depending on the assumptions we want to make. 
-
-
-\subsection{Results}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../Figures/land_use_distribution_almeria_2021.pdf}
+\end{figure}
 
 
 \end{document}

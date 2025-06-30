@@ -190,19 +190,13 @@ Therefore the linear regression equation can be written as
 The parameters we care about are $\alpha_{k,j}$ for all $(k,j)$ pairs and $\alpha_R$. However, for one specific $k$, we can only have one intercept recovered. When indeed we have $\alpha_{k,j}$ and $\alpha_{k,a}$ that we care about. Therefore, we need to make some assumptions. The assumption that this paper makes is that for one choice $k^*$ all the $\alpha_{kk^*}$ is the same for all current state $k$. And we normalize it to $\alpha_{kk^*} = 0$.
 
 The problem set takes a similar approach, for a fixed $k$ and some fixed $jar$, we know the value of
-$$ \theta_{j} + \theta_{a} + \theta_{kj} + \theta_{ka} + \beta(\theta_{jr} - \theta_{ar})$$
+$$ \theta_{j} - \theta_{a} + \theta_{kj} -\theta_{ka} + \beta(\theta_{jr} - \theta_{ar})$$
 Then just pick another $k'= a$ and the same fixed $jar$, we know 
-$$ \theta_{j} + \theta_{a} + \theta_{aj} + \theta_{aa} + \beta(\theta_{jr} - \theta_{ar})$$
+$$ \theta_{j} - \theta_{a} + \theta_{aj} - \theta_{aa} + \beta(\theta_{jr} - \theta_{ar})$$
 Then we can take the difference between the two equations, which gives us
-$$ \theta_{kj} + \theta_{ka} - \theta_{aj} - \theta_{aa} $$
+$$ \theta_{kj} - \theta_{ka} - \theta_{aj} + \theta_{aa} $$
 Restrict that for one choice $j^*$, we have $\theta_{kj^*} = 0$ for all $k$. Then the above becomes $$ \theta_{ka} - \theta_{aa}$$
-We also assume that $\theta_{aa} = 0$ for all $a$. Then we recovre $ \theta_{ka}$
-
-Therefore to recover $\theta_{ka}$, 
-\begin{enumerate}
-    \item We need $\Delta_{kj^*ar}$ and $\Delta_{aj^*ar}$
-    \item Then $\theta_{ka} = \Delta_{kj^*ar} - \Delta_{aj^*ar}$ if we assume $\theta_{kj^*} = 0$ for all $k$ and $\theta_{aa} = 0$ for all $a$.
-\end{enumerate}
+We also assume that $\theta_{aa} = 0$ for all $a$. 
 
 \subsection{Estimation}
 We construct a panel data. The unit is indexed by $k$ and $j$ and $a$ and $r$ (and $m$). The time is indexed by $t$. Then we adopt techniques in panel data estimation depending on the assumptions we want to make. 

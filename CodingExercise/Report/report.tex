@@ -36,22 +36,48 @@ Environmental Economics}
 \maketitle
 
 \section{Spatial Data}
-\subsection{Land size}
-\input{../Tables/grid_head.tex}
 
-\subsection{Cropland in Almeria}
+\begin{enumerate}
+    \item Reclassify crops based on land use and irrigation.
+    \item Calculate the size of grids.
+    \item Show the distribution of irrigated and non-irrigated croplands in Almeria in 2021 ~\ref{fig:land_use_distribution_almeria_2021}.
+    \item Irrigated area by crop and aggregate over time ~\ref{fig:irrigated_area_by_crop_over_time}.
+    \item Average area by crop ~\ref{tab:area_by_crop_avg}. Average area by crop and irrigation ~\ref{tab:area_by_crop_irr_avg}.
+\end{enumerate}
+
+
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{../Figures/land_use_distribution_almeria_2021.pdf}
+    \caption{Distribution of irrigated and non-irrigated croplands in Almeria in 2021.}
+    \label{fig:land_use_distribution_almeria_2021}
 \end{figure}
 
-\subsection{Cropland size under irrigation over time}
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{../Figures/irrigated_area_by_crop_over_time.pdf}
+    \caption{Irrigated area by crop and aggregate over time.}
+    \label{fig:irrigated_area_by_crop_over_time}
 \end{figure}
 
+\begin{table}
+    \centering
+    \input{../Tables/area_by_crop_avg.tex}
+    \caption{Average area by crop.}
+    \label{tab:area_by_crop_avg}
+\end{table}
+
+\begin{table}
+    \centering
+    \input{../Tables/area_by_crop_irr_avg.tex}
+    \caption{Average area by crop and irrigation.}
+    \label{tab:area_by_crop_irr_avg}
+\end{table}
+
+
 \section{Model}
+Instead of directly answering the questions, I develop the estimating equation in the following way (which answers the question indirectly).
+
 \paragraph{State} Usually, we write the observed state as $s$ and unobserved state as $\varepsilon$.
 
 Here, the observed state has to two components: the individual state $k$ and the aggregate state $\omega$. 
@@ -169,14 +195,81 @@ But this is actually not necessary. Perhaps we have over identifification. But I
 
 
 
-
 % Keeping the standard assumption on $\varepsilon$, the ccp takes the form of 
 % $$ \Pr(a_t = a | k, \omega) = \frac{\exp \tilde{u}(k, \omega, a)}{\sum_{a' \in A} \exp \tilde{u}(k, \omega, a')} $$
 
 
 \section{Estimation}
 
-\newpage
+\paragraph{Observations filtering}
+We restrict ourselves to the following two paths of actions, rather than any possible paths. 
+\begin{enumerate}
+    \item $k\to k\to a$
+    \item $k\to a \to a$
+\end{enumerate}
+
+Therefore we have
+\begin{itemize}
+    \item $Y_{tk}  = \log \frac{\Pr(a_t = k | k, \omega)}{\Pr(a_t = a | k, \omega)} + \beta \log \frac{\Pr_{t+1}(a | k, \omega')}{\Pr_{t+1}(a | a, \omega')}$
+    \item $\theta_k-\theta_a + \theta_{kk} - \theta_{ka} + \beta(\theta_{ka}-\theta_{aa})$
+    \item $\theta_R(R(m,a) - R(m,k))$
+    \item $\xi(k, \omega,k) - \xi(k, \omega,a) + \beta(\xi_{t+1}(k, \omega',a) - \xi_{t+1}(a, \omega',a))$
+    \item $e_t(\omega',\omega, a) - e_t(\omega',\omega, k)$
+\end{itemize}
+
+\paragraph{Left-hand side variable}
+To construct the left-hand side variable of the estimating equation, we need to estimate the choice probability first $\Pr(a_t = a | k, \omega)$.
+For each province-year-state-action pair, we use the frequency of action as the probability.
+
+\paragraph{Right-hand side variable}
+To construct the right-hand side variables, we estiamte the return by first predicting the yields and price, then plus subsidies and minus costs. 
+The estimating equation is that we split the data into subcrop category, then we run for each category
+
+\verb| lm(log(yield) ~ DD30 * precipitation + DD10 * precipitation + year + prov )|
+
+There seems to large differences between the predicted return and the actual return. Finer data maybe helpful as in \citet{scott2014dynamic} because in that paper, there are both state, country and land, three levels. While here we only have province and land. If there is a county level data on weather, we can better predict the return. 
+
+In the following estimation, I used the actual return.
+
+\paragraph{Panel data estimation}
+
+We first take difference to remove the fixed effect. Then we use the lagged value $x_{k,t-2}$ as the instrument for the first difference of the regressors $\Delta x_{kt} = x_{kt} - x_{k,t-1}$.
+
+The esimating moment condition is 
+$$
+    E[(\Delta y_{kt} - \beta \Delta x_{kt}) \cdot x_{k,t-2}] = 0
+$$
+
+
+\paragraph{Recover fixed effect and switching cost parameters}
+
+We use the following equations to recover the fixed effect $\alpha_i$ where $\bar{y}_i,\bar{x}_i$ is the time average. And $i$ is the index for the unit (k-a pair)
+$$
+    \hat{\alpha}_i = \bar{y}_i - \beta \bar{x}_i
+$$
+
+Recall that
+
+$$
+    \alpha_{ka} = \theta_k-\theta_a + \theta_{kk} - \theta_{ka} + \beta(\theta_{ka}-\theta_{aa}) = \theta_k-\theta_a- \theta_{ka} + \beta \theta_{ka}$$
+
+
+\begin{enumerate}
+    \item step 1: pick any $k_1$ and $a_0 = \text{other}$, we have $\alpha_{k_1 a_0}-\alpha_{a_0 a_0} = \theta_{k_1} - \theta_{a_0} + (\beta-1)(\theta_{k_1 a_0} - \theta_{a_0 a_0}) = \theta_{k_1} - \theta_{a_0}$
+    \item step 2: pick any $a_1$  Then $\alpha_{k_1 a_1}-\alpha_{k_1 a_0} = \theta_{a_0}- \theta_{a_1} + (\beta -1)(\theta_{k_1 a_1 }-\theta_{k_1 a_0}) = \theta_{a_0}- \theta_{a_1} + (\beta -1)\theta_{k_1 a_1 }$
+          Since we can get any $\theta_{a_0}- \theta_{a_1}$ from step 1. Then we can automatically recover $\theta_{k_1a_1}$
+    \item fixing $k_1$ and $a_1$ to be of the same crop but different irrigation will give irrigation switching cost. fixing them of differnt crops but same irrigation will give crop switching cost.
+\end{enumerate}
+
+\paragraph{Myopic and static model}
+\begin{itemize}
+    \item For the myopic model, we set $\beta=0$ and everthing else the same.
+    \item For the static model which basically entirely removes state dependence. We need to recalculate the choice probability not conditional on state. T
+          $$ \log(p_{jt}/p_{0t}) = \alpha + \beta X_{jt} + \xi_{jt} = \beta X_{jt}+\xi_j + \varepsilon_{jt}$$
+          Then use the GMM as above. 
+\end{itemize}
+
+
 \bibliography{ref.bib}
 
 \end{document}
